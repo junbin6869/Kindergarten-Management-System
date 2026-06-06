@@ -1,0 +1,11 @@
+node_modules/
+dist/
+target/
+tools/
+.expo/
+.env
+*.db
+
+backend/target/
+admin-web/dist/
+mobile-app/dist/

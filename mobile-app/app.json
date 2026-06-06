@@ -1,0 +1,16 @@
+{
+  "expo": {
+    "name": "Kindergarten Mobile",
+    "slug": "kindergarten-mobile",
+    "scheme": "kindergarten-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "plugins": [
+      "expo-asset"
+    ]
+  }
+}
