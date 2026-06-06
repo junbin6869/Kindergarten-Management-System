@@ -40,7 +40,6 @@ On the first run, create `backend/.env` and add your Stripe test values:
 
 ```powershell
 cd C:\Users\junbi\Document\Kindergarten\backend
-Copy-Item .env.example .env
 notepad .env
 ```
 
