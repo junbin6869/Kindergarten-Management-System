@@ -26,40 +26,32 @@ All SQL-seeded accounts use the password `password`.
 
 - Admin: `admin@kindergarten.test`
 - Teacher: `teacher@kindergarten.test`
-- Teacher: `teacher2@kindergarten.test`
-- Teacher: `teacher3@kindergarten.test`
 - Parent: `parent@kindergarten.test`
-- Parent: `parent2@kindergarten.test`
-- Parent: `parent3@kindergarten.test`
-- Parent: `parent4@kindergarten.test`
-- Parent: `parent5@kindergarten.test`
 
 The demo data includes 3 classes, 10 students, linked parent records, attendance history, June/May invoices, and paid/pending/failed payment states.
 
 ## Run Locally
 
-Open three PowerShell terminals: one for the backend web server, one for the admin web dashboard, and one for the mobile app.
+Open four PowerShell terminals: one for the backend, one for the Stripe webhook listener, one for the admin web dashboard, and one for the mobile app.
 
 ### 1. Backend / Web Server
 
+On the first run, create `backend/.env` and add your Stripe test values:
+
+```powershell
+cd C:\Users\junbi\Document\Kindergarten\backend
+Copy-Item .env.example .env
+notepad .env
+```
+
+Start the backend using the local environment configuration:
+
+```powershell
 cd C:\Users\junbi\Document\Kindergarten\backend
 .\run-local.ps1
-
-Use this command when `mvn` is already available in your PATH:
-
-```powershell
-cd C:\Users\junbi\Document\Kindergarten\backend
-mvn spring-boot:run
 ```
 
-If `mvn` is not available, use the Maven bundled in this repo:
-
-```powershell
-cd C:\Users\junbi\Document\Kindergarten\backend
-$env:JAVA_HOME='C:\Program Files\Eclipse Adoptium\jdk-21.0.11.10-hotspot'
-$env:Path="$env:JAVA_HOME\bin;C:\Users\junbi\Document\Kindergarten\tools\apache-maven-3.9.11\bin;$env:Path"
-mvn spring-boot:run
-```
+Always use `run-local.ps1` for local development. Running `mvn spring-boot:run` directly does not load `backend/.env`.
 
 Backend URL:
 
@@ -69,7 +61,23 @@ http://localhost:8080
 
 The backend creates a local SQLite file at `backend/kindergarten.db` and loads `backend/src/main/resources/data-sqlite.sql`.
 
-### 2. Admin Web
+If startup says port `8080` is already in use, the backend is probably already running. Check it with:
+
+```powershell
+Test-NetConnection localhost -Port 8080
+```
+
+### 2. Stripe Webhook Listener
+
+Keep this running in a separate PowerShell terminal during local Stripe testing:
+
+```powershell
+stripe listen --forward-to http://localhost:8080/api/payments/webhook
+```
+
+Copy the displayed `whsec_...` value into `backend/.env` as `STRIPE_WEBHOOK_SECRET`, then restart the backend.
+
+### 3. Admin Web
 
 ```powershell
 cd C:\Users\junbi\Document\Kindergarten\admin-web
@@ -83,7 +91,7 @@ Admin web URL:
 http://localhost:5173
 ```
 
-### 3. Mobile App
+### 4. Mobile App
 
 ```powershell
 cd C:\Users\junbi\Document\Kindergarten\mobile-app
@@ -143,23 +151,13 @@ FRONTEND_SUCCESS_URL=http://YOUR_LAN_IP:8080/api/payments/return/success
 FRONTEND_CANCEL_URL=http://YOUR_LAN_IP:8080/api/payments/return/cancel
 ```
 
-Local Stripe webhook forwarding:
+Example `backend/.env`:
 
-```powershell
-stripe listen --forward-to http://localhost:8080/api/payments/webhook
-```
-
-Start the backend with Stripe enabled:
-
-```powershell
-cd C:\Users\junbi\Document\Kindergarten\backend
-$env:JAVA_HOME='C:\Program Files\Eclipse Adoptium\jdk-21.0.11.10-hotspot'
-$env:Path="$env:JAVA_HOME\bin;C:\Users\junbi\Document\Kindergarten\tools\apache-maven-3.9.11\bin;$env:Path"
-$env:STRIPE_SECRET_KEY='sk_test_xxx'
-$env:STRIPE_WEBHOOK_SECRET='whsec_xxx'
-$env:FRONTEND_SUCCESS_URL='http://192.168.1.2:8080/api/payments/return/success'
-$env:FRONTEND_CANCEL_URL='http://192.168.1.2:8080/api/payments/return/cancel'
-mvn spring-boot:run
+```text
+STRIPE_SECRET_KEY=sk_test_xxx
+STRIPE_WEBHOOK_SECRET=whsec_xxx
+FRONTEND_SUCCESS_URL=http://192.168.1.2:8080/api/payments/return/success
+FRONTEND_CANCEL_URL=http://192.168.1.2:8080/api/payments/return/cancel
 ```
 
 Use this Stripe test card:
@@ -171,4 +169,4 @@ Any CVC
 Any postal code
 ```
 
-The webhook is the source of truth for marking bills as paid. The mobile app opens the Stripe Checkout URL and refreshes bills when the user returns to the app.
+The webhook normally marks bills as paid. The backend also reconciles pending payments with Stripe when the parent fee list refreshes.
