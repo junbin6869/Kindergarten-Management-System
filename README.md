@@ -25,14 +25,7 @@ Monorepo for a Spring Boot backend, React admin dashboard, and React Native mobi
 All SQL-seeded accounts use the password `password`.
 
 - Admin: `admin@kindergarten.test`
-- Teacher: `teacher@kindergarten.test`
-- Teacher: `teacher2@kindergarten.test`
-- Teacher: `teacher3@kindergarten.test`
 - Parent: `parent@kindergarten.test`
-- Parent: `parent2@kindergarten.test`
-- Parent: `parent3@kindergarten.test`
-- Parent: `parent4@kindergarten.test`
-- Parent: `parent5@kindergarten.test`
 
 The demo data includes 3 classes, 10 students, linked parent records, attendance history, June/May invoices, and paid/pending/failed payment states.
 
